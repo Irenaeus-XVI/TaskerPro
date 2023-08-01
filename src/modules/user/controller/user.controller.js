@@ -1,7 +1,7 @@
 
 import userModel from "../../../../database/models/user.model.js";
-import bcrypt from "bcrypt";
-
+import bcrypt, { hash } from "bcrypt";
+import jwt from 'jsonwebtoken';
 
 
 
@@ -22,5 +22,55 @@ export const signUp = async (req, res) => {
     } catch (err) {
         res.status(501).json({ Message: "ERROR", err });
     }
+
+}
+
+//NOTE - 2-login-->with create token
+export const signIn = async (req, res) => {
+
+    try {
+        let { email, password } = req.body;
+        const userFounded = await userModel.findOne({ email });
+        if (userFounded) {
+            const hashedPassword = bcrypt.compareSync(password, userFounded.password);
+
+            if (hashedPassword) {
+                jwt.sign({ id: userFounded._id, name: userFounded.userName }, process.env.SECRETKEY, (err, decoded) => {
+                    res.json({ Message: "Welcome.", token: decoded });
+                });
+
+            } else {
+                res.json({ Message: "Wrong password" });
+            }
+        }
+        else {
+            res.json({ Message: "You Have To Register First." });
+        }
+    }
+    catch (err) {
+        res.status(400).json({ err });
+    }
+
+}
+
+
+//NOTE - 3-change password (user must be logged in)
+export const changePassword = async (req, res) => {
+    try {
+        let { userId } = req;
+        let { password } = req.body;
+        const userFounded = await userModel.findById({ _id: userId });
+        if (userFounded) {
+            const hashedPassword = bcrypt.hashSync(password, parseInt(process.env.SULTROUND));
+            const updatedUser = await userModel.findByIdAndUpdate({ _id: userId }, { password: hashedPassword }, { new: true }).select("-password -_id");
+            res.status(200).json({ Message: "Password Updated Successfully.", updatedUser });
+        } else {
+            res.status(200).json({ Message: "You Have To LogIn First.", updatedUser });
+        }
+    }
+    catch (err) {
+        res.status(501).json({ err });
+    }
+
 
 }
