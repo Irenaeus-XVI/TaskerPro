@@ -10,11 +10,17 @@ export const addTask = async (req, res) => {
     try {
         let { userId } = req;
         let { title, description, status, deadline } = req.body;
-        const task = await taskModel.create({ title, description, status, userId, deadline });
         const user = await userModel.findOne({ _id: userId });
-        user.tasks.push(task._id);
-        await user.save();
-        res.status(200).json({ Message: "Task Added Successfully.", task })
+        if (user) {
+            const task = await taskModel.create({ title, description, status, userId, deadline });
+            user.tasks.push(task._id);
+            await user.save();
+            res.status(200).json({ Message: "Task Added Successfully.", task })
+        } else {
+            res.status(404).json({ Message: "User Not Found.", user })
+
+        }
+
     }
 
     catch (err) {
@@ -89,8 +95,6 @@ export const deleteTask = async (req, res) => {
 
 
 //NOTE - 4-get all tasks with user data
-
-
 export const getAllTasksWithUserData = async (req, res) => {
 
     try {
@@ -104,5 +108,42 @@ export const getAllTasksWithUserData = async (req, res) => {
         res.status(500).json({ Error: err });
     }
 }
+//NOTE - 5-get tasks of oneUser with user data userId (user must be logged in)
+export const getAllTasksOfOneUser = async (req, res) => {
+    try {
+        let { userId } = req;
+        const user = await userModel.findOne({ _id: userId });
+        if (user) {
+            const tasks = await taskModel.find({ userId }).populate({ path: "userId", select: " -password" });
+            res.status(200).json({ Tasks: tasks });
+        } else {
+            res.status(404).json({ Message: "User Not Found " });
+
+        }
+
+    } catch (error) {
+        res.status(500).json({ Error: err });
+
+    }
+}
+
+
+
+//NOTE - 6-get all tasks that not done after deadline
+export const getAllTasksThatNotDoneAfterDeadline = async (req, res) => {
+
+    const currentDate = new Date()
+    const tasks = await taskModel.find({
+        $or: [
+            { status: "toDo" }, { status: "doing" }
+        ],
+        deadline: { $lt: currentDate }
+    });
+    res.status(200).json({ Tasks: tasks });
+
+}
+
+
+
 
 
