@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     age: Number,
     gender: String,
     phone: String,
+    tasks: [{ type: mongoose.Types.ObjectId, ref: "Task" }],
     deleted: { type: Boolean, default: false }
 }, {
     timestamps: true

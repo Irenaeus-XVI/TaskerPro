@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 
-const taskSchema = mongoose.Schema({
+const taskSchema = new mongoose.Schema({
     title: String,
     description: String,
     status: {
@@ -23,4 +23,4 @@ const taskSchema = mongoose.Schema({
 
 const taskModel = mongoose.model("Task", taskSchema);
 
-export default taskModel;
+export default taskModel; 

@@ -1,7 +1,8 @@
 
 import userModel from "../../../../database/models/user.model.js";
-import bcrypt, { hash } from "bcrypt";
+import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import taskModel from "../../../../database/models/task.model.js";
 
 
 
@@ -107,7 +108,8 @@ export const deleteUser = async (req, res) => {
         const deletedUser = await userModel.findByIdAndDelete({ _id: userId });
         console.log(deletedUser);
         if (deletedUser) {
-            res.status(200).json({ Message: "User Deleted Successfully.", deletedUser });
+            const tasks = await taskModel.deleteMany({ userId });
+            res.status(200).json({ Message: "User Deleted Successfully.", deletedUser, tasks });
         } else {
             res.status(404).json({ Message: "No User Found." });
         }
