@@ -40,15 +40,15 @@ export const signIn = async (req, res) => {
                 });
 
             } else {
-                res.json({ Message: "Wrong password" });
+                res.status(401).json({ Message: "Wrong password" });
             }
         }
         else {
-            res.json({ Message: "You Have To Register First." });
+            res.status(401).json({ Message: "You Have To Register First." });
         }
     }
     catch (err) {
-        res.status(400).json({ err });
+        res.status(500).json({ Message: "Error", err });;
     }
 
 }
@@ -65,11 +65,11 @@ export const changePassword = async (req, res) => {
             const updatedUser = await userModel.findByIdAndUpdate({ _id: userId }, { password: hashedPassword }, { new: true }).select("-password -_id");
             res.status(200).json({ Message: "Password Updated Successfully.", updatedUser });
         } else {
-            res.status(200).json({ Message: "You Have To LogIn First.", updatedUser });
+            res.status(401).json({ Message: "You Have To LogIn First.", updatedUser });
         }
     }
     catch (err) {
-        res.status(501).json({ err });
+        res.status(500).json({ Message: "Error", err });;
     }
 }
 
@@ -79,17 +79,20 @@ export const updateUser = async (req, res) => {
     try {
         let { userId } = req;
         let { age, firstName, lastName } = req.body;
+        if (!firstName || !lastName) {
+            return res.status(400).json({ Message: "Both firstName and lastName are required." });
+        }
         const userName = firstName + " " + lastName
 
         const updatedUser = await userModel.findByIdAndUpdate({ _id: userId }, { age, userName }, { new: true }).select("-password -_id");
         if (updatedUser) {
             res.status(200).json({ Message: "User Updated Successfully.", updatedUser });
         } else {
-            res.status(200).json({ Message: "You Have To LogIn First." });
+            res.status(401).json({ Message: "You Have To LogIn First." });
         }
     }
     catch (err) {
-        res.status(501).json({ err })
+        res.status(500).json({ Message: "Error", err });
     }
 
 
@@ -106,15 +109,48 @@ export const deleteUser = async (req, res) => {
         if (deletedUser) {
             res.status(200).json({ Message: "User Deleted Successfully.", deletedUser });
         } else {
-            res.status(200).json({ Message: "No User Found." });
+            res.status(404).json({ Message: "No User Found." });
         }
+    }
+    catch (err) {
+        res.status(500).json({ Message: "Error", err });
+    }
+}
+
+//NOTE - 6-soft delete(user must be logged in)
+export const softDelete = async (req, res) => {
+    try {
+        let { userId } = req;
+        const softDeletedUser = await userModel.findByIdAndUpdate({ _id: userId }, { deleted: true }, { new: true });
+        if (softDeletedUser) {
+            res.status(200).json({ Message: "User Soft Deleted Successfully.", softDeletedUser });
+        }
+        else {
+            res.status(401).json({ Message: "You have to log in first." });
+        }
+    }
+    catch (err) {
+        res.status(500).json({ Message: "Error", err });
+    }
+}
+
+//NOTE - 7-logout
+
+export const logOut = async (req, res) => {
+    try {
+        let { userId } = req;
+        const foundedUser = await userModel.findByIdAndUpdate({ _id: userId }).select("-_id -password");
+        if (foundedUser) {
+            res.status(200).json({ Message: "You have successfully logged out.", foundedUser });
+        } else {
+            res.status(200).json({ Message: "You Have To LogIn First." });
+        }
+
     }
     catch (err) {
         res.status(501).json({ err })
     }
 }
-
-
 
 
 
