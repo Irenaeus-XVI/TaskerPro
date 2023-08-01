@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     password: String,
     age: Number,
     gender: String,
-    phone: String
+    phone: String,
+    deleted: { type: Boolean, default: false }
 }, {
     timestamps: true
 });

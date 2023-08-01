@@ -95,5 +95,26 @@ export const updateUser = async (req, res) => {
 
 }
 
+//NOTE - 5-delete user(user must be logged in)
+export const deleteUser = async (req, res) => {
+    try {
+        let { userId } = req;
+        console.log(userId, "asd");
+
+        const deletedUser = await userModel.findByIdAndDelete({ _id: userId });
+        console.log(deletedUser);
+        if (deletedUser) {
+            res.status(200).json({ Message: "User Deleted Successfully.", deletedUser });
+        } else {
+            res.status(200).json({ Message: "No User Found." });
+        }
+    }
+    catch (err) {
+        res.status(501).json({ err })
+    }
+}
+
+
+
 
 
