@@ -1,6 +1,6 @@
 //NOTE - import dotenv
 import * as dotenv from 'dotenv';
-//NOTE - configurations
+//NOTE - configurations 
 dotenv.config();
 //NOTE - import expressJS
 import express from 'express';

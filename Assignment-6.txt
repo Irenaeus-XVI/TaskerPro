@@ -6,13 +6,13 @@ tasks collection-->schema(title , description , status{toDo , doing , done} , us
 don't forget to get user id from token
 
 1)user
-1-signUp 
-2-login-->with create token
-3-change password (user must be logged in)
-4-update user (age , firstName , lastName)(user must be logged in)
-5-delete user(user must be logged in)
-6-soft delete(user must be logged in)
-7-logout
+1-signUp ✔
+2-login-->with create token✔
+3-change password (user must be logged in)✔
+4-update user (age , firstName , lastName)(user must be logged in)✔
+5-delete user(user must be logged in)✔
+6-soft delete(user must be logged in)✔
+7-logout✔
 
 
 2)task
