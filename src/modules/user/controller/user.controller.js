@@ -71,6 +71,29 @@ export const changePassword = async (req, res) => {
     catch (err) {
         res.status(501).json({ err });
     }
+}
+
+
+//NOTE - 4-update user (age , firstName , lastName)(user must be logged in)
+export const updateUser = async (req, res) => {
+    try {
+        let { userId } = req;
+        let { age, firstName, lastName } = req.body;
+        const userName = firstName + " " + lastName
+
+        const updatedUser = await userModel.findByIdAndUpdate({ _id: userId }, { age, userName }, { new: true }).select("-password -_id");
+        if (updatedUser) {
+            res.status(200).json({ Message: "User Updated Successfully.", updatedUser });
+        } else {
+            res.status(200).json({ Message: "You Have To LogIn First." });
+        }
+    }
+    catch (err) {
+        res.status(501).json({ err })
+    }
 
 
 }
+
+
+
