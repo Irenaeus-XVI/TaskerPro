@@ -27,13 +27,13 @@ To run the application locally, follow these steps:
 
 1. Clone the repository:
 
-`git clone https://github.com/Irenaeus-XVI/New-folder.git`
+   `git clone https://github.com/Irenaeus-XVI/New-folder.git`
 
 2. Install dependencies:
 
-`cd TaskerPro`
+   `cd TaskerPro`
 
-`npm install`
+   `npm install`
 
 
 3. Set up environment variables:
@@ -42,18 +42,18 @@ Create a `.env` file in the root directory and provide the following variables:
 
 
 
-`PORT=3000`
+    `PORT=3000`
 
-`MONGODB_URI=your_mongodb_connection_string`
+    `MONGODB_URI=your_mongodb_connection_string`
 
-`SECRET_KEY=your_secret_key_for_jwt`
+    `SECRET_KEY=your_secret_key_for_jwt`
 
-`SALT_ROUNDS=10`
+    `SALT_ROUNDS=10`
 
 
 4. Run the app:
 
-`npm start`
+   `npm start`
 
 
 
