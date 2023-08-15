@@ -36,7 +36,13 @@ export const signIn = async (req, res) => {
             const hashedPassword = bcrypt.compareSync(password, userFounded.password);
 
             if (hashedPassword) {
-                jwt.sign({ id: userFounded._id, name: userFounded.userName }, process.env.SECRETKEY, (err, decoded) => {
+                await userModel.findByIdAndUpdate(userFounded._id, { loggedOut: false });
+                const tokenPayload = {
+                    id: userFounded._id,
+                    name: userFounded.userName,
+                }
+                jwt.sign(tokenPayload, process.env.SECRETKEY, (err, decoded) => {
+
                     res.json({ Message: "Welcome.", token: decoded });
                 });
 
@@ -141,12 +147,13 @@ export const softDelete = async (req, res) => {
 export const logOut = async (req, res) => {
     try {
         let { userId } = req;
-        const foundedUser = await userModel.findByIdAndUpdate({ _id: userId }).select("-_id -password");
-        if (foundedUser) {
-            res.status(200).json({ Message: "You have successfully logged out.", foundedUser });
+        const loggedOutUser = await userModel.findByIdAndUpdate({ _id: userId }, { loggedOut: true }, { new: true }).select(" -password");
+        if (loggedOutUser) {
+            res.status(200).json({ Message: "You have successfully logged out." });
         } else {
-            res.status(200).json({ Message: "You Have To LogIn First." });
+            res.status(404).json({ Message: "User not found." });
         }
+
 
     }
     catch (err) {

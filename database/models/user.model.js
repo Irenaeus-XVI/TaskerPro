@@ -12,7 +12,11 @@ const userSchema = new mongoose.Schema({
     gender: String,
     phone: String,
     tasks: [{ type: mongoose.Types.ObjectId, ref: "Task" }],
-    deleted: { type: Boolean, default: false }
+    deleted: { type: Boolean, default: false },
+    loggedOut: {
+        type: Boolean,
+        default: false
+    }
 }, {
     timestamps: true
 });

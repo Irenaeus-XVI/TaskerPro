@@ -16,12 +16,12 @@ don't forget to get user id from token
 
 
 2)task
-1-add task with status (toDo)(user must be logged in)
-2-update task (title , description , status) (user must be logged in) (creator only can update task)
-3-delete task(user must be logged in) (creator only can delete task)
-4-get all tasks with user data
-5-get tasks of oneUser with user data userId (user must be logged in)
-6-get all tasks that not done after deadline
+1-add task with status (toDo)(user must be logged in)✔
+2-update task (title , description , status) (user must be logged in) (creator only can update task)✔
+3-delete task(user must be logged in) (creator only can delete task)✔
+4-get all tasks with user data✔ 
+5-get tasks of oneUser with user data userId (user must be logged in)✔
+6-get all tasks that not done after deadline✔
 
 الديدلاين يوم التلات 1/8 الساعة 12 بليل 
 * ياريت نلتزم بالطريقة اللي بنسمي بيها الفايلات * 

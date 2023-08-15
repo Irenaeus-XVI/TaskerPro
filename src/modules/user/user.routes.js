@@ -9,7 +9,7 @@ router.put("/changePassword", auth, changePassword);
 router.put("/updateUser", auth, updateUser);
 router.delete("/deleteUser", auth, deleteUser);
 router.delete("/softDelete", auth, softDelete);
-router.get("/logOut", auth, logOut);
+router.post("/logOut", auth, logOut);
 
 
 
