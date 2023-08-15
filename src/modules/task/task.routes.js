@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import { addTask, updateTask, deleteTask, getAllTasksWithUserData, getAllTasksOfOneUser, getAllTasksThatNotDoneAfterDeadline } from './controller/task.controller.js';
-import { auth } from '../middleware/auth.js';
+import { auth } from '../../middleware/auth.js';
 
 
 

@@ -3,6 +3,7 @@ import userModel from "../../../../database/models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import taskModel from "../../../../database/models/task.model.js";
+import { sendEmail } from "../../../Email/sendEmail.js";
 
 
 
@@ -18,6 +19,10 @@ export const signUp = async (req, res) => {
         } else {
             const hashedPassword = bcrypt.hashSync(password, parseInt(process.env.SULTROUND));
             const user = await userModel.insertMany({ userName, email, password: hashedPassword, age, gender, phone });
+            const verifyToken = jwt.sign({ id: user[0]._id }, process.env.VERIFY_SECRET);
+            sendEmail({ email, api: `http://localhost:3000/user/verify/${verifyToken}` });
+
+
             res.status(200).json({ Message: "user Added Successfully", user });
         }
     } catch (err) {
@@ -32,27 +37,33 @@ export const signIn = async (req, res) => {
     try {
         let { email, password } = req.body;
         const userFounded = await userModel.findOne({ email });
-        if (userFounded) {
-            const hashedPassword = bcrypt.compareSync(password, userFounded.password);
+        if (userFounded.verified) {
+            if (userFounded) {
+                const hashedPassword = bcrypt.compareSync(password, userFounded.password);
 
-            if (hashedPassword) {
-                await userModel.findByIdAndUpdate(userFounded._id, { loggedOut: false });
-                const tokenPayload = {
-                    id: userFounded._id,
-                    name: userFounded.userName,
+                if (hashedPassword) {
+                    await userModel.findByIdAndUpdate(userFounded._id, { loggedOut: false });
+                    const tokenPayload = {
+                        id: userFounded._id,
+                        name: userFounded.userName,
+                    }
+                    jwt.sign(tokenPayload, process.env.SECRETKEY, (err, decoded) => {
+
+                        res.json({ Message: "Welcome.", token: decoded });
+                    });
+
+                } else {
+                    res.status(401).json({ Message: "Wrong password" });
                 }
-                jwt.sign(tokenPayload, process.env.SECRETKEY, (err, decoded) => {
-
-                    res.json({ Message: "Welcome.", token: decoded });
-                });
-
-            } else {
-                res.status(401).json({ Message: "Wrong password" });
             }
+            else {
+                res.status(401).json({ Message: "You Have To Register First." });
+            }
+        } else {
+            res.status(401).json({ Message: "You Have To Verify Your Account First." });
+
         }
-        else {
-            res.status(401).json({ Message: "You Have To Register First." });
-        }
+
     }
     catch (err) {
         res.status(500).json({ Message: "Error", err });;
@@ -159,6 +170,22 @@ export const logOut = async (req, res) => {
     catch (err) {
         res.status(501).json({ err })
     }
+
+
+
+}
+
+
+
+export const verifyEmail = (req, res) => {
+    const { token } = req.params;
+    jwt.verify(token, process.env.VERIFY_SECRET, async (err, decoded) => {
+        if (err) return res.json({ err: err });
+        const updatedUser = await userModel.findByIdAndUpdate(decoded.id, { verified: true }, { new: true })
+        res.status(200).json({ Message: "Verify", updatedUser })
+
+    })
+
 }
 
 

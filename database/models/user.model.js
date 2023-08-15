@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
     loggedOut: {
         type: Boolean,
         default: false
+    },
+    verified: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
