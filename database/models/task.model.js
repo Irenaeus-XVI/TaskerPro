@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 
 
 const taskSchema = new mongoose.Schema({
-    title: String,
+    title: {
+        type: String,
+        require: true,
+        minLength: [3, 'title is to short']
+    },
     description: String,
     status: {
         type: String,

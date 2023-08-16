@@ -15,4 +15,8 @@ app.use(express.json());
 
 app.use("/user", userRoutes);
 app.use("/task", taskRoutes);
+
+app.use('*', (req, res, next) => {
+    res.json({ Message: `Invalid Url ${req.originalUrl}` });
+})
 app.listen(port, () => console.log(`Server is listening on port ${port}!`));
