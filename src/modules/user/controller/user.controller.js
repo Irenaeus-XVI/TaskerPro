@@ -8,6 +8,8 @@ import { handleAsyncError } from '../../../middleware/handleAsyncError.js'
 import { AppError } from "../../../utils/AppError.js";
 
 
+
+
 //NOTE - 1-signUp 
 export const signUp = handleAsyncError(async (req, res, next) => {
 
@@ -15,6 +17,7 @@ export const signUp = handleAsyncError(async (req, res, next) => {
     //NOTE - Check for user registered before
     let { userName, email, password, age, gender, phone } = req.body;
     const userFounded = await userModel.findOne({ email }).select("-password -_id ");
+
     if (userFounded) {
         return next(new AppError('user Already Exist', 409));
     } else {
@@ -28,13 +31,19 @@ export const signUp = handleAsyncError(async (req, res, next) => {
     }
 
 
+
+
+
 });
+
+
+
 
 //NOTE - 2-login-->with create token
 export const signIn = handleAsyncError(async (req, res, next) => {
-
-
     let { email, password } = req.body;
+
+
     const userFounded = await userModel.findOne({ email });
     if (userFounded.verified) {
         if (userFounded) {
@@ -65,6 +74,8 @@ export const signIn = handleAsyncError(async (req, res, next) => {
 
 
 
+
+
 });
 
 //NOTE - 3-change password (user must be logged in)
@@ -86,7 +97,7 @@ export const changePassword = handleAsyncError(async (req, res, next) => {
 
 
 //NOTE - 4-update user (age , firstName , lastName)(user must be logged in)
-export const updateUser = handleAsyncError(async (req, res) => {
+export const updateUser = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     let { age, firstName, lastName } = req.body;
