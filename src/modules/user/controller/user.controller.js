@@ -5,17 +5,18 @@ import jwt from 'jsonwebtoken';
 import taskModel from "../../../../database/models/task.model.js";
 import { sendEmail } from "../../../Email/sendEmail.js";
 import { handleAsyncError } from '../../../middleware/handleAsyncError.js'
+import { AppError } from "../../../utils/AppError.js";
 
 
 //NOTE - 1-signUp 
-export const signUp = handleAsyncError(async (req, res) => {
+export const signUp = handleAsyncError(async (req, res, next) => {
 
 
     //NOTE - Check for user registered before
     let { userName, email, password, age, gender, phone } = req.body;
     const userFounded = await userModel.findOne({ email }).select("-password -_id ");
     if (userFounded) {
-        res.status(200).json({ Message: "user Already Exist", userFounded });
+        return next(new AppError('user Already Exist', 409));
     } else {
         const hashedPassword = bcrypt.hashSync(password, parseInt(process.env.SULTROUND));
         const user = await userModel.insertMany({ userName, email, password: hashedPassword, age, gender, phone });
@@ -30,7 +31,7 @@ export const signUp = handleAsyncError(async (req, res) => {
 });
 
 //NOTE - 2-login-->with create token
-export const signIn = handleAsyncError(async (req, res) => {
+export const signIn = handleAsyncError(async (req, res, next) => {
 
 
     let { email, password } = req.body;
@@ -51,15 +52,15 @@ export const signIn = handleAsyncError(async (req, res) => {
                 });
 
             } else {
-                res.status(401).json({ Message: "Wrong password" });
+                return next(new AppError('Wrong password', 400));
             }
         }
         else {
-            res.status(401).json({ Message: "You Have To Register First." });
+            return next(new AppError('You Have To Register First.', 401));
+
         }
     } else {
-        res.status(401).json({ Message: "You Have To Verify Your Account First." });
-
+        return next(new AppError('You Have To Verify Your Account First.', 401));
     }
 
 
@@ -68,7 +69,7 @@ export const signIn = handleAsyncError(async (req, res) => {
 
 //NOTE - 3-change password (user must be logged in)
 
-export const changePassword = handleAsyncError(async (req, res) => {
+export const changePassword = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     let { password } = req.body;
@@ -78,7 +79,7 @@ export const changePassword = handleAsyncError(async (req, res) => {
         const updatedUser = await userModel.findByIdAndUpdate({ _id: userId }, { password: hashedPassword }, { new: true }).select("-password -_id");
         res.status(200).json({ Message: "Password Updated Successfully.", updatedUser });
     } else {
-        res.status(401).json({ Message: "You Have To LogIn First.", updatedUser });
+        return next(new AppError('You Have To LogIn First.', 401));
     }
 
 });
@@ -90,7 +91,7 @@ export const updateUser = handleAsyncError(async (req, res) => {
     let { userId } = req;
     let { age, firstName, lastName } = req.body;
     if (!firstName || !lastName) {
-        return res.status(400).json({ Message: "Both firstName and lastName are required." });
+        return next(new AppError('Both firstName and lastName are required.', 400));
     }
     const userName = firstName + " " + lastName
 
@@ -98,7 +99,8 @@ export const updateUser = handleAsyncError(async (req, res) => {
     if (updatedUser) {
         res.status(200).json({ Message: "User Updated Successfully.", updatedUser });
     } else {
-        res.status(401).json({ Message: "You Have To LogIn First." });
+        return next(new AppError('You Have To LogIn First.', 401));
+
     }
 
 
@@ -106,7 +108,7 @@ export const updateUser = handleAsyncError(async (req, res) => {
 });
 
 //NOTE - 5-delete user(user must be logged in)
-export const deleteUser = handleAsyncError(async (req, res) => {
+export const deleteUser = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     console.log(userId, "asd");
@@ -117,13 +119,14 @@ export const deleteUser = handleAsyncError(async (req, res) => {
         const tasks = await taskModel.deleteMany({ userId });
         res.status(200).json({ Message: "User Deleted Successfully.", deletedUser, tasks });
     } else {
-        res.status(404).json({ Message: "No User Found." });
+        return next(new AppError('No User Found.', 404));
+
     }
 
 });
 
 //NOTE - 6-soft delete(user must be logged in)
-export const softDelete = handleAsyncError(async (req, res) => {
+export const softDelete = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     const softDeletedUser = await userModel.findByIdAndUpdate({ _id: userId }, { deleted: true }, { new: true });
@@ -131,21 +134,22 @@ export const softDelete = handleAsyncError(async (req, res) => {
         res.status(200).json({ Message: "User Soft Deleted Successfully.", softDeletedUser });
     }
     else {
-        res.status(401).json({ Message: "You have to log in first." });
+        return next(new AppError('You have to log in first."', 401));
+
     }
 
 });
 
 //NOTE - 7-logout
 
-export const logOut = handleAsyncError(async (req, res) => {
+export const logOut = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     const loggedOutUser = await userModel.findByIdAndUpdate({ _id: userId }, { loggedOut: true }, { new: true }).select(" -password");
     if (loggedOutUser) {
         res.status(200).json({ Message: "You have successfully logged out." });
     } else {
-        res.status(404).json({ Message: "User not found." });
+        return next(new AppError('User not found."', 404));
     }
 
 

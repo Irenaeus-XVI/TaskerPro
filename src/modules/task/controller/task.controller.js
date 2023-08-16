@@ -4,10 +4,11 @@
 import taskModel from "../../../../database/models/task.model.js";
 import userModel from "../../../../database/models/user.model.js";
 import { handleAsyncError } from "../../../middleware/handleAsyncError.js";
+import { AppError } from "../../../utils/AppError.js";
 
 
 //NOTE - 1-add task with status (toDo)(user must be logged in)
-export const addTask = handleAsyncError(async (req, res) => {
+export const addTask = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     let { title, description, status, deadline } = req.body;
@@ -18,27 +19,29 @@ export const addTask = handleAsyncError(async (req, res) => {
         await user.save();
         res.status(200).json({ Message: "Task Added Successfully.", task })
     } else {
-        res.status(404).json({ Message: "User Not Found.", user })
+        return next(new AppError('User not found."', 404));
+
     }
 });
 
 
 
 //NOTE - 2-update task (title , description , status) (user must be logged in) (creator only can update task)
-export const updateTask = handleAsyncError(async (req, res) => {
+export const updateTask = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     let { title, description, status, taskId } = req.body;
     const task = await taskModel.findOne({ _id: taskId });
     console.log(task);
     if (!task) {
-        return res.status(404).json({ Message: "Task Not Found.", task });
+        return next(new AppError('Task Not Found."', 404));
     }
     const updatedTask = await taskModel.findOneAndUpdate({ _id: taskId, userId }, { title, description, status }, { new: true });
     if (updatedTask) {
         res.status(200).json({ Message: "Task Updated Successfully.", updatedTask });
     } else {
-        res.status(404).json({ Message: "You Are Not Authorized To Update This Task.", updatedTask });
+        return next(new AppError('You Are Not Authorized To Update This Task."', 404));
+
     }
 
 });
@@ -47,7 +50,7 @@ export const updateTask = handleAsyncError(async (req, res) => {
 
 
 //NOTE - 3-delete task(user must be logged in) (creator only can delete task)
-export const deleteTask = handleAsyncError(async (req, res) => {
+export const deleteTask = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     let { taskId } = req.body;
@@ -55,7 +58,8 @@ export const deleteTask = handleAsyncError(async (req, res) => {
     const task = await taskModel.findOne({ _id: taskId });
     console.log(task);
     if (!task) {
-        return res.status(404).json({ Message: "Task Not Found.", task });
+        return next(new AppError('Task Not Found."', 404));
+
     }
     const deletedTask = await taskModel.findOneAndDelete({ _id: taskId, userId });
 
@@ -68,7 +72,8 @@ export const deleteTask = handleAsyncError(async (req, res) => {
         await user.save();
         res.status(200).json({ Message: "Task Deleted Successfully.", deletedTask })
     } else {
-        res.status(404).json({ Message: "You Are Not Authorized To Delete This Task", deletedTask });
+        return next(new AppError('You Are Not Authorized To Delete This Task"', 404));
+
 
     }
 
@@ -81,19 +86,20 @@ export const deleteTask = handleAsyncError(async (req, res) => {
 
 
 //NOTE - 4-get all tasks with user data
-export const getAllTasksWithUserData = handleAsyncError(async (req, res) => {
+export const getAllTasksWithUserData = handleAsyncError(async (req, res, next) => {
 
 
     const tasks = await taskModel.find().populate({ path: "userId", select: "-_id -password" });
     if (tasks.length) {
         res.status(200).json({ Tasks: tasks });
     } else {
-        res.status(200).json({ Message: "No Tasks Found." });
+        return next(new AppError('No Tasks Found.', 404));
+
     }
 
 });
 //NOTE - 5-get tasks of oneUser with user data userId (user must be logged in)
-export const getAllTasksOfOneUser = handleAsyncError(async (req, res) => {
+export const getAllTasksOfOneUser = handleAsyncError(async (req, res, next) => {
 
     let { userId } = req;
     const user = await userModel.findOne({ _id: userId });
@@ -101,7 +107,8 @@ export const getAllTasksOfOneUser = handleAsyncError(async (req, res) => {
         const tasks = await taskModel.find({ userId }).populate({ path: "userId", select: " -password" });
         res.status(200).json({ Tasks: tasks });
     } else {
-        res.status(404).json({ Message: "User Not Found " });
+        return next(new AppError('User Not Found.', 404));
+
 
     }
 
@@ -111,7 +118,7 @@ export const getAllTasksOfOneUser = handleAsyncError(async (req, res) => {
 
 
 //NOTE - 6-get all tasks that not done after deadline
-export const getAllTasksThatNotDoneAfterDeadline = handleAsyncError(async (req, res) => {
+export const getAllTasksThatNotDoneAfterDeadline = handleAsyncError(async (req, res, next) => {
 
     const currentDate = new Date()
     const tasks = await taskModel.find({
